@@ -41,6 +41,14 @@ func Encode(src interface{}) ([]byte, error) {
 	return res.Bytes(), err
 }
 
+func MustEncode(src ...interface{}) []byte {
+	out, err := Encode(src)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
 func encode(buf io.Writer, src interface{}) error {
 	t := reflect.TypeOf(src)
 	val := reflect.ValueOf(src)
@@ -74,7 +82,7 @@ func encode(buf io.Writer, src interface{}) error {
 		}
 		return binary.Write(buf, binary.BigEndian, math.Float64bits(float))
 	case reflect.Struct:
-		switch val.Interface().(type) {
+		switch src.(type) {
 		case time.Time:
 			t := src.(time.Time).UTC().Unix()
 			n := src.(time.Time).Nanosecond()

@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-func Simple(t *testing.T, val interface{}) {
+func Simple(t *testing.T, val interface{}) []byte {
 	buf, err := Encode(val)
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("%v", string(buf))
+	// t.Logf("%v", string(buf))
 	res, err := Decode(buf)
 	if err != nil {
 		t.Error(err)
@@ -23,6 +23,7 @@ func Simple(t *testing.T, val interface{}) {
 	if !reflect.DeepEqual(res, val) {
 		t.Errorf("%v != %v", res, val)
 	}
+	return buf
 }
 
 func TestNull(t *testing.T) {
@@ -64,6 +65,14 @@ func TestArrays(t *testing.T) {
 	Simple(t, []interface{}{true, nil, 8.8, "bar"})
 }
 
+func TestNext(t *testing.T) {
+	first := Simple(t, []interface{}{true, nil, 8.8, "bar"})
+	second := Simple(t, []interface{}{true, nil, 8.8, "bar", nil})
+	if bytes.Compare(first, second) != -1 {
+		t.Errorf("values aren't sorting properly")
+	}
+}
+
 func TestSorts(t *testing.T) {
 	sorted := []interface{}{
 		nil,
@@ -81,6 +90,7 @@ func TestSorts(t *testing.T) {
 		[]interface{}{0.0, 1.0, "foo", 1.0},
 		[]interface{}{0.0, "bar", "baz"},
 		[]interface{}{0.0, "foo"},
+		[]interface{}{0.0, "foo", nil},
 		[]interface{}{0.0, "foo", "bar"},
 		[]interface{}{0.0, "foo", []interface{}{}},
 		[]interface{}{0.0, "foo", []interface{}{"bar"}},
